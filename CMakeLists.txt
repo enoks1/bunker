@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.13)
+project("bunker")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+include_directories("./raylib/build/raylib/include")
+add_executable(Main ./src/Main.cc ./src/Game_Logic.hh ./src/Game_Frame.hh)
+target_link_libraries(Main -lraylib -L./raylib/build/raylib/)
