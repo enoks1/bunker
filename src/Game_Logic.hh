@@ -5,8 +5,10 @@
 
 #include "Parameters.hh"
 
-class Game_Logic {
+class Game_Logic
+{
 	enum Block_Type {
+		nil,
 		L,
 		J,
 		O,
@@ -30,16 +32,23 @@ class Game_Logic {
 	};
 
 	class Block {
-		int32_t type;
-		int32_t state = SPAWN;
-		int32_t rotation = NONE;
-
-		std::array<Block_Type, 7> bag{L, J, O, S, Z, I, T};
+		private:
+			Block_Type type = nil;
+			int32_t state = SPAWN;
+			int32_t rotation = NONE;
+		public:
+			Block(Block_Type type) {
+				this->type = type;
+			}
+			Block_Type Get_Type() {
+				return this->type;
+			}
 	};
 
-	class Active_Block {
+	class Active_Block : public Block {
 		private:
 			Block *block = nullptr;
+
 			void Attach_Block(Block *b) {
 				if (block == nullptr) {
 					this->block = b;
@@ -47,11 +56,14 @@ class Game_Logic {
 			}
 			void Detach_Block() {
 				if (this->block != nullptr) {
+					delete this->block;
 					this->block = nullptr;
 				}
 			}
 
 		public:
+			Active_Block(Block_Type block_type) :Block(block_type) {}
+
 			void Swap_Active(Block *active) {
 				Detach_Block();
 				Attach_Block(active);
@@ -69,16 +81,26 @@ class Game_Logic {
 				this->y = y;
 				this->occupied = occupied;
 			}
+			int32_t Get_X() {
+				return this->x;
+			}
+			int32_t Get_Y() {
+				return this->y;
+			}
 			bool Is_Occupied() {
 				return this->occupied;
 			}
+			void Make_Occupied() {
+				this->occupied = true;
+			}
 	};
 
-	class Board {
+	class Board_State {
 		private:
 			std::array<Point, 200> board;
+			std::array<Block_Type, 7> bag{L, J, O, S, Z, I, T};
 		public:
-			Board() {
+			Board_State() {
 				auto count = 0;
 				for (int32_t i = 0; i < 20; ++i) {
 					for (int32_t j = 0; j < 10; ++j) {
@@ -100,21 +122,60 @@ class Game_Logic {
 				} 
 				std::cout << std::endl;
 			}
-			// TODO
-			void spawn_block() {}
-			void move_left_block() {}
-			void move_right_block() {}
-			void slow_drop_block() {}
-			void hard_drop_block() {}
-			void left_rotate_block() {}
-			void right_rotate_block() {}
+			void Fill_Coordinate(int32_t x, int32_t y) {
+				for (auto i = 0; i < 200; ++i) {
+					if (board[i].Get_X() == x && board[i].Get_Y() == y) {
+						board[i].Make_Occupied();
+					}
+				}
+			}
+			void Spawn_Block(Active_Block active_block) {
+				switch (active_block.Get_Type()) {
+					case L:
+						break;
+					case J:
+						break;
+					case O:
+						Fill_Coordinate(4, 0);
+						Fill_Coordinate(4, 1);
+						Fill_Coordinate(5, 0);
+						Fill_Coordinate(5, 1);
+						break;
+					case S:
+						break;
+					case Z:
+						break;
+					case I:
+						break;
+					case T:
+						break;
+					default:
+						;
+				}
+			}
+			void Move_Left_Block() {}
+			void Move_Right_Block() {}
+			void Slow_Drop_Block() {}
+			void Hard_Drop_Block() {}
+			void Left_Rotate_Block() {}
+			void Right_rotate_Block() {}
 	};
 
 	public:
-	Game_Logic() :board{Board()} {}
-	void Print_Board() {
+	void Spawn(Block_Type block_type) {
+		Active_Block active_block = Active_Block(block_type); // Make new block.
+		active_block.Swap_Active(&active_block); // Make it active.
+		board.Spawn_Block(active_block); // Pass it to the enviroment.
+	}
+	void Print() {
 		this->board.Dump_Board();
 	}
+	Game_Logic() :board{Board_State()}, active_block{Active_Block(nil)}{
+		Spawn(O);
+		Print();
+	}
+
 	private:
-	Board board;
+	Board_State board;
+	Active_Block active_block;
 };

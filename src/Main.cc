@@ -14,9 +14,8 @@ int main() {
 	gf->Scale(1.5);
 
 	Game_Logic gl = Game_Logic();
-	gl.Print_Board();
 
-	//return 0;
+	return 0;
 
 	while (!WindowShouldClose()) {
 		/// User
